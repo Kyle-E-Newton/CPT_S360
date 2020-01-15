@@ -1,0 +1,55 @@
+ Case  | a.out |  TEXT  |  DATA  |  BSS   |
+--------------------------------------------
+ (1)   | 7236  | 1507   | 304    | 8      |
+--------------------------------------------
+ (2)   | 7240  | 1507   | 308    | 4      |
+--------------------------------------------
+ (3)   | 7236  | 1507   | 304    | 40032  |
+--------------------------------------------
+ (4)   | 47260 | 1507   | 40328  | 4      |
+--------------------------------------------
+ (5)   | 7316  | 1710   | 308    | 8      |
+--------------------------------------------
+ (6)   | 7328  | 1523   | 304    | 40068  |
+--------------------------------------------
+
+ANSWER THESE QUESTIONS:
+
+   1. Variables in C may be classified as
+
+          globals ---|--- UNINITIALIZED  globals;
+                     |---   INITIALIZED  globals;
+
+          locals  ---|--- AUTOMATIC locals;
+                     |--- STATIC    locals;
+
+   In terms of the above classification and the variables g, a, b, c, d,
+
+      Which variables are in DATA? Any global or static variables, which is anything not defined in a function, or are static
+      Which variables are in BSS ? Variables that are initialized to 0 or do not have explicit initialization
+
+   2. In terms of the TEXT, DATA and BSS sections,
+      Which sections are in a.out, which section is NOT in a.out? 
+      WHY? Just TEXT and DATA. However, the BSS section only stores the size in the a.out file. This is because the loader needs to take the segments and map them in memory.
+
+  (B). For each case, use   cc -m32 -static t.c   to generate a.out.
+       Record the sizes again and compare them with the sizes in (A).
+       WHAT DO YOU SEE?
+
+ Case  | a.out |  TEXT  |  DATA  |  BSS   |
+--------------------------------------------
+ (1)   | 657628| 581866 | 11264  | 3344   |
+--------------------------------------------
+ (2)   | 657628| 581866 | 11264  | 3344   |
+--------------------------------------------
+ (3)   | 657628| 581866 | 11264  | 43344  |
+--------------------------------------------
+ (4)   | 697660| 581866 | 51296  | 3344   |
+--------------------------------------------
+ (5)   | 657628| 581914 | 11264  | 3344   |
+--------------------------------------------
+ (6)   | 657720| 581882 | 11264  | 43376  |
+--------------------------------------------
+
+       WHY?
+       Because with static we override dynamic linking, which means all things need to be included in the out file. Therefore there is a larger amount of data in the file as the include is necessary.
