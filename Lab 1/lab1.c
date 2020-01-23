@@ -25,7 +25,7 @@ struct partition {
 };
 
 int fd;
-int sector_one_start = 0, estart = 0, dev = 1, endsector = 0;
+int sector_one_start = 0, estart = 0, dev = 0, endsector = 0;
 char buf[512];
 void read_partitions(struct partition *p);
 
@@ -43,7 +43,8 @@ main(int argc, const char *argv[]) {
 
 void read_partitions(struct partition *p) {
     while(p->sys_type != 0 && p->drive == 0) {
-        printf("dev%d \t", dev);
+        dev++;
+        printf("vdisk%d \t", dev);
         printf(" %8d \t",p->start_sector);
         printf(" %8d\t", ((int)p->start_sector) + ((int)p->nr_sectors) - 1);
         printf(" %8d\t", p->nr_sectors);
@@ -59,7 +60,7 @@ void read_partitions(struct partition *p) {
                 read(fd, buf, 512);
                 pEx = (struct partition *)&buf[0x1BE];
                 int exstart = pEx->start_sector + offset + estart;
-                printf("dev%d \t", dev);
+                printf("vdisk%d \t", dev);
                 printf(" %8d \t", exstart);
                 printf(" %8d\t", exstart + ((int)pEx->nr_sectors) - 1);
                 printf(" %8d\t", pEx->nr_sectors);
