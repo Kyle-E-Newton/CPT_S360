@@ -34,6 +34,8 @@ int body()
       do_switch();
     else if (!strcmp(command, "exit"))
       do_exit();
+    else if (!strcmp(command, "wait"))
+      do_wait();
     else
       printf("invalid command\n");
   }
@@ -129,18 +131,6 @@ int kfork(int(*func))
   enqueue(&readyQueue, p);
 
   return p->pid;
-}
-
-void ksleep(int event)
-{
-  running->event = event;
-  running->status = SLEEP;
-  enqueue(&sleepList, running);
-  tswitch();
-}
-
-void kwakeup(int event)
-{
 }
 
 int init()
