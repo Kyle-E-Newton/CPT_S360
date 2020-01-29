@@ -119,7 +119,7 @@ int kwait(int *status)
   {
     return -1;
   }
-
+  
   while (1)
   {
     for (pCur = running->child, pPrev = NULL; pCur; pPrev = pCur, pCur = pCur->sibling)
@@ -158,7 +158,6 @@ void giveAwayChildren()
 {
   PROC *p1 = running;
   PROC *pCur = NULL;
-
   while (p1->pid != 1)
   {
     p1 = p1->parent;
@@ -166,8 +165,9 @@ void giveAwayChildren()
 
   if (running->child != NULL)
   {
-    if (p1->child == NULL)
+    if (p1->child != NULL)
     {
+      printf("Child p1 is null\n");
       running->child = p1->child;
       pCur = p1->child;
     }

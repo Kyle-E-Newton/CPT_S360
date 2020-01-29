@@ -1,0 +1,89 @@
+Script started on 2020-01-29 15:54:57-0800
+]0;captain@uss-thunderfuck: ~/Documents/CS360/Pre-Lab 2[01;32mcaptain@uss-thunderfuck[00m:[01;34m~/Documents/CS360/Pre-Lab 2[00m$ ./a.out
+
+Welcome to 360 Multitasking System
+freeList = [1 0]->[2 0]->[3 0]->[4 0]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+init complete: P0 running
+P0 fork P1
+P0: switch task
+proc 0 in scheduler()
+readyQueue = [1 1]->[0 0]->NULL
+next running = 1
+proc 1 resume to body()
+***************************************
+proc 1 running: Parent=0
+freeList  = [2 0]->[3 0]->[4 0]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : fork
+proc 1 kforked a child = 2
+readyQueue = [2 1]->[0 0]->NULL
+***************************************
+proc 1 running: Parent=0
+freeList  = [3 0]->[4 0]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [2 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : switch
+proc 1 switch task
+proc 1 in scheduler()
+readyQueue = [2 1]->[1 1]->[0 0]->NULL
+next running = 2
+proc 2 resume to body()
+***************************************
+proc 2 running: Parent=1
+freeList  = [3 0]->[4 0]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [1 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : fork
+proc 2 kforked a child = 3
+readyQueue = [1 1]->[3 1]->[0 0]->NULL
+***************************************
+proc 2 running: Parent=1
+freeList  = [4 0]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [1 1]->[3 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : fork
+proc 2 kforked a child = 4
+readyQueue = [1 1]->[3 1]->[4 1]->[0 0]->NULL
+***************************************
+proc 2 running: Parent=1
+freeList  = [5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [1 1]->[3 1]->[4 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : exit
+proc 2 in do_exit(), enter an exit value : 0
+Proc 2 in kexit(), value=0
+Child p1 is null
+proc 2 in scheduler()
+readyQueue = [1 1]->[3 1]->[4 1]->[0 0]->NULL
+next running = 1
+proc 1 resume
+***************************************
+proc 1 running: Parent=0
+freeList  = [5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [3 1]->[4 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : invalid command
+***************************************
+proc 1 running: Parent=0
+freeList  = [5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [3 1]->[4 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : wait
+Waiting
+Finished waiting with proc 2 and status 0
+***************************************
+proc 1 running: Parent=0
+freeList  = [2 1]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [3 1]->[4 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : wait
+Waiting
+Finished waiting with proc -1 and status 0
+***************************************
+proc 1 running: Parent=0
+freeList  = [2 1]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [3 1]->[4 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : exit
+P1 never dies
+***************************************
+proc 1 running: Parent=0
+freeList  = [2 1]->[5 0]->[6 0]->[7 0]->[8 0]->NULL
+readQueue = [3 1]->[4 1]->[0 0]->NULL
+input a command: [ps|fork|switch|exit|wait] : ^C
+]0;captain@uss-thunderfuck: ~/Documents/CS360/Pre-Lab 2[01;32mcaptain@uss-thunderfuck[00m:[01;34m~/Documents/CS360/Pre-Lab 2[00m$ exit
+exit
+
+Script done on 2020-01-29 15:55:26-0800
