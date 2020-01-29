@@ -124,10 +124,9 @@ int kwait(int *status)
   {
     for (pCur = running->child, pPrev = NULL; pCur; pPrev = pCur, pCur = pCur->sibling)
     {
-      printf("%d", pCur->status);
       if (pCur->status == 4)
       {
-        *status = pCur->exitCode;
+        status = pCur->exitCode;
         if (pPrev == NULL)
         {
           running->child = pCur->sibling;
@@ -151,11 +150,8 @@ void do_wait()
 {
   printf("Waiting\n");
   int *status;
-  printf(&running);
-  printf("Waiting\n");
   int pid = kwait(status);
-  printf("Waiting\n");
-  printf("Finished waiting with proc %d and status %d", pid, status);
+  printf("Finished waiting with proc %d and status %d\n", pid, status);
 }
 
 void giveAwayChildren()
@@ -189,7 +185,7 @@ void giveAwayChildren()
     while (pCur != NULL)
     {
       pCur->parent = p1;
-      pCur->pid = p1->pid;
+      //pCur->pid = p1->pid;
       pCur = pCur->sibling;
     }
   }
