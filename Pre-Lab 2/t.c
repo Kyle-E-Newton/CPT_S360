@@ -79,15 +79,6 @@ int do_ps()
   }
 }
 
-/*
-int kexit(int value)
-{
-  running->exitCode = value;
-  running->status = ZOMBIE;
-  tswitch(); 
-} 
-*/
-
 int do_exit()
 {
   int value;

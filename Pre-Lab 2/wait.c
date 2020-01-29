@@ -88,15 +88,19 @@ int kexit(int value)
 {
   // give away children, if any, to P1
   PROC *p;
-  if(running->pid == 1) {
+  if (running->pid == 1)
+  {
     printf("P1 never dies\n");
     return 0;
-  } else {
+  }
+  else
+  {
     printf("Proc %d in kexit(), value=%d\n", running->pid, value);
     running->exitCode = value;
     running->status = ZOMBIE;
 
-    if(running->pid != 1) {
+    if (running->pid != 1)
+    {
       giveAwayChildren();
     }
 
@@ -108,24 +112,30 @@ int kexit(int value)
 // 3. Implement kwait() per the algorithm in 3.5.3
 int kwait(int *status)
 {
-  PROC* pCur = running->child;
-  PROC* pPrev = NULL;
+  PROC *pCur = running->child;
+  PROC *pPrev = NULL;
 
-  if(running->child == NULL) {
+  if (running->child == NULL)
+  {
     return -1;
   }
 
-  while(1) {
-    for(pCur = running->child, pPrev = NULL; pCur; pPrev = pCur, pCur = pCur->sibling) {
-      if(pCur->status == 3) {
+  while (1)
+  {
+    for (pCur = running->child, pPrev = NULL; pCur; pPrev = pCur, pCur = pCur->sibling)
+    {
+      printf("%d", pCur->status);
+      if (pCur->status == 4)
+      {
         *status = pCur->exitCode;
-
-        if(pPrev == NULL) {
+        if (pPrev == NULL)
+        {
           running->child = pCur->sibling;
-        } else {
+        }
+        else
+        {
           pPrev->sibling = pCur->sibling;
         }
-
         pCur->status = 0;
 
         enqueue(&freeList, pCur);
@@ -141,32 +151,43 @@ void do_wait()
 {
   printf("Waiting\n");
   int *status;
+  printf(&running);
+  printf("Waiting\n");
   int pid = kwait(status);
+  printf("Waiting\n");
   printf("Finished waiting with proc %d and status %d", pid, status);
 }
 
-void giveAwayChildren() {
+void giveAwayChildren()
+{
   PROC *p1 = running;
   PROC *pCur = NULL;
 
-  while(p1->pid != 1) {
+  while (p1->pid != 1)
+  {
     p1 = p1->parent;
   }
 
-  if(running->child != NULL) {
-    if(p1->child == NULL) {
+  if (running->child != NULL)
+  {
+    if (p1->child == NULL)
+    {
       running->child = p1->child;
       pCur = p1->child;
-    } else {
+    }
+    else
+    {
       pCur = p1->child;
-      while(pCur->sibling != NULL) {
+      while (pCur->sibling != NULL)
+      {
         pCur = p1->sibling;
       }
       pCur->sibling = running->child;
       pCur = pCur->sibling;
     }
 
-    while(pCur != NULL) {
+    while (pCur != NULL)
+    {
       pCur->parent = p1;
       pCur->pid = p1->pid;
       pCur = pCur->sibling;
