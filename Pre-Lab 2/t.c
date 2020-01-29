@@ -22,7 +22,7 @@ int body()
     printList("freeList ", freeList);
     printList("readQueue", readyQueue);
 
-    printf("input a command: [ps|fork|switch|exit] : ");
+    printf("input a command: [ps|fork|switch|exit|wait] : ");
     fgets(command, 64, stdin);
     command[strlen(command) - 1] = 0;
 
@@ -102,36 +102,36 @@ int do_exit()
   kexit(value);
 }
 
-int kfork(int(*func))
-{
-  PROC *p;
-  int i;
-  /*** get a proc from freeList for child proc: ***/
-  p = dequeue(&freeList);
-  if (!p)
-  {
-    printf("no more proc\n");
-    return (-1);
-  }
+// int kfork(int(*func))
+// {
+//   PROC *p;
+//   int i;
+//   /*** get a proc from freeList for child proc: ***/
+//   p = dequeue(&freeList);
+//   if (!p)
+//   {
+//     printf("no more proc\n");
+//     return (-1);
+//   }
 
-  /* initialize the new proc and its stack */
-  p->status = READY;
-  p->priority = 1; // for ALL PROCs except P0
-  p->ppid = running->pid;
-  p->parent = running;
+//   /* initialize the new proc and its stack */
+//   p->status = READY;
+//   p->priority = 1; // for ALL PROCs except P0
+//   p->ppid = running->pid;
+//   p->parent = running;
 
-  //                    -1   -2  -3  -4  -5  -6  -7  -8   -9
-  // kstack contains: |retPC|eax|ebx|ecx|edx|ebp|esi|edi|eflag|
-  for (i = 1; i < 10; i++)
-    p->kstack[SSIZE - i] = 0;
+//   //                    -1   -2  -3  -4  -5  -6  -7  -8   -9
+//   // kstack contains: |retPC|eax|ebx|ecx|edx|ebp|esi|edi|eflag|
+//   for (i = 1; i < 10; i++)
+//     p->kstack[SSIZE - i] = 0;
 
-  p->kstack[SSIZE - 1] = (int)func;
-  p->saved_sp = &(p->kstack[SSIZE - 9]);
+//   p->kstack[SSIZE - 1] = (int)func;
+//   p->saved_sp = &(p->kstack[SSIZE - 9]);
 
-  enqueue(&readyQueue, p);
+//   enqueue(&readyQueue, p);
 
-  return p->pid;
-}
+//   return p->pid;
+// }
 
 int init()
 {
