@@ -21,13 +21,13 @@ int main(int argc, char *argv[], char *env[]) {
     printf("Looking for the PATH variable\n");
     i = 0;
     while(env[i]) {
-        if(strncmp(env[i], "PATH=", 5) == 0) {
-            printf("found PATH : %s\n", i, env[i]);
-            printf("Copy PATH string to gpath[]\n");
-            strcpy(gpath, &env[i][5]);
-            printf("gpath=%s\n", gpath);
-            break;
-        }
+        // if(strncmp(env[i], "PATH=", 5) == 0) {
+        //     printf("found PATH : %s\n", i, env[i]);
+        //     printf("Copy PATH string to gpath[]\n");
+        //     strcpy(gpath, &env[i][5]);
+        //     printf("gpath=%s\n", gpath);
+        //     break;
+        // }
         i++;
     }
 
