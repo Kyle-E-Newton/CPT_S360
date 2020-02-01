@@ -1,11 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 char gpath[128];
 char *dir[128];
 int n;
 
 int main(int argc, char *argv[], char *env[]) {
+    //1. Find PATH/HOME
     char *s;
     int i = 0;
 
@@ -30,7 +33,7 @@ int main(int argc, char *argv[], char *env[]) {
         }
         i++;
     }
-
+    //2. Decompose PATH into dir[0], dir[1], ...
     printf("Tokenize gpath[] into token strings\n");
     n = 0;
     s = strtok(gpath, ":");
