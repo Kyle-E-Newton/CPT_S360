@@ -1,0 +1,12 @@
+void getPath();
+void getHome();
+char *getInput();
+char **parseInput(char *in_string);
+void runCommand(char **inputArr, char *env[]);
+int forkChild(char **inputArr, char *env);
+int getPipe(char **inputArr, char **head, char **tail);
+void Pipeline(char **head, char **tail, char *env[]);
+char *getRedirect(char **inputArr, int *redir);
+void doRedirect(char *file, int redir);
+void otherCommand(char **inputArr, char *env[]);
+void runInput(char **inputArr, char *env[]);
