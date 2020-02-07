@@ -131,6 +131,13 @@ int forkChild(char **inputArr, char *env) {
     head = (char **)malloc(sizeof(char*)*20);
     tail = (char **)malloc(sizeof(char*)*20);
 
+    // while(inputArr[i]) {
+    //     printf("myargv[%d] = %s\n", i, inputArr[i]);
+    //     i++;
+    // }
+    // printf("myargv[%d] = %s\n", i, inputArr[i]);
+    // i = 0;
+
     pid = fork();                                   //Forks process
 
     if(pid < 0) {                                   //Errors if fork doesn't happen
@@ -149,7 +156,6 @@ int forkChild(char **inputArr, char *env) {
             i = 0;                                  //Iterates through head
             while(head[i]) {
                 Pipeline(head, tail, env);          //Pipeline 
-                otherCommand(inputArr, env);
             }
         }
         else {
@@ -212,13 +218,13 @@ void Pipeline(char **head, char **tail, char *env[]) {
         close(1);
         dup(pd[1]);
         pid = wait(&status);
-        runInput(head, env);
+        runInput(tail, env);
     }
     else {                      //If pid == 0, then do not wait and run command on new pipe
         close(pd[1]);
         close(0);
-        dup(pd[0]);
-        runInput(head, env);
+        dup(pd[0]);;
+        runInput(tail, env);
     }
 }
 
