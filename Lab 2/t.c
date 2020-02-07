@@ -149,6 +149,7 @@ int forkChild(char **inputArr, char *env) {
             i = 0;                                  //Iterates through head
             while(head[i]) {
                 Pipeline(head, tail, env);          //Pipeline 
+                otherCommand(inputArr, env);
             }
         }
         else {
