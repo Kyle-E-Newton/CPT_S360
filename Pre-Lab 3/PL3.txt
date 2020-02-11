@@ -1,0 +1,37 @@
+Kyle Newton
+11573540
+Pre-Lab 3
+
+1) See attatched Code
+Concurrent Threads
+USEC: 2322, 2282, 2084, 2041, 1982
+
+Sequential
+USEC: 2, 2, 2, 2, 2
+
+The run time difference is huge. There's almost a 1000x reduction in runtime, even if it is not noticeable to the user
+
+2)
+
+2.1) 	Critical Regions: A piece of code that can only execute one process at a time. Shared resources are protected.
+	How to protect them: Generally whyen a process wants to enter a critical region it will raise a flag that will signal it being used. When it leaves, it lowers the flag. No other process can take control of the critical region until the flag is lowered, even if the other process is suspended.
+
+2.2)	Mutexes are locks set before using a shared resource and release after using it. Therefore when the region is locked when there is a thread accessing it. This way we do not end up accessing data that we do not want to, eg. before computation.
+
+2.3)	
+
+Concurrent
+USEC: 25529, 16701, 22702, 21724, 22066
+
+Sequential
+USEC: 7510, 7594, 7518, 7527, 7590
+
+3)
+
+3.1) 	Condition variables work by holding a queue of threads when a state is not as wanted, and then when that state changes, the thread can be woken and allow it to continue.
+
+3.2) 	Prediction: There will not be enough consumer threads to handle both producer
+	Reality: We run into buffers being necessary to work with all of the data. That should be remedied by adding an extra consumer
+
+3.3)	Prediction: We will not have enough producer threads and the consumers will be waiting on producer threads
+	Reality: There was not enough producer threads, so the program ended up suspended infefinatley, waiting on another producer
