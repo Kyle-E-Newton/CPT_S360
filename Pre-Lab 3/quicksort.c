@@ -42,18 +42,10 @@ int main() {
     gettimeofday(&t1, NULL);
 
     Qs(a, 0, N - 1);
-    printArray(a, N);
 
     gettimeofday(&t2, NULL);
 
     printf("t2: sec=%ld usec=%ld\n", t2.tv_sec, t2.tv_usec);
     printf("t1: sec=%ld usec=%ld\n", t1.tv_sec, t1.tv_usec);
     printf("usec used = %ld\n", t2.tv_usec - t1.tv_usec);
-}
-
-void printArray(int arr[], int size) {
-    for(int i = 0; i < size; i++) {
-        printf("%d ", arr[i]);
-    }
-    printf("\n");
 }
