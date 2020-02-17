@@ -65,7 +65,12 @@ int main(int argc, char *argv[])
 {
   int i, j;
   double sum;
-  pthread_t threads[N];
+
+  int NTHREADS = atoi(argv[1]);
+  if (NTHREADS > N)
+   NTHREADS = N;
+
+  pthread_t threads[NTHREADS];
  
   printf("main: initialize matrix A[N][N+1] as [A|B]\n"); 
   for (i=0; i<N; i++)
@@ -78,15 +83,16 @@ int main(int argc, char *argv[])
   }
   print_matrix();  // show initial matrix [A|B]
 
-  pthread_barrier_init(&barrier, NULL, N); // set up barrier
+  pthread_barrier_init(&barrier, NULL, NTHREADS); // set up barrier
 
-  printf("main: create N=%d working threads\n", N);
-  for (i=0; i<N; i++){
+  printf("main: create N=%d working threads\n", NTHREADS);
+  for (i=0; i<NTHREADS; i++){
      pthread_create(&threads[i], NULL, ge, (void *)i);
   }
-  printf("main: wait for all %d working threads to join\n", N);
-  for (i=0; i<N; i++){
+  printf("main: wait for all %d working threads to join\n", NTHREADS);
+  for (i=0; i<NTHREADS; i++){
        pthread_join(threads[i], NULL);
+       printf("Thread %d joined \n", i);
   }
   printf("main: back substitution : ");
   for (i=N-1; i>=0; i--){
