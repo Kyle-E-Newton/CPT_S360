@@ -8,6 +8,7 @@
 
 #include <fcntl.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 #define MAX 256
 #define BLK 1024
@@ -19,8 +20,10 @@ struct sockaddr_in server_addr;
 int server_sock, r;
 int SERVER_IP, SERVER_PORT;
 
-char *cmd, cwd[128], *pathname, line[MAX], ans[MAX];
+char cmd[MAX], cwd[128], *pathname, line[MAX], ans[MAX];
 char args[10][MAX];
+
+int cfd;
 
 DIR *dirptr;
 struct dirent *ent;
@@ -106,14 +109,16 @@ main(int argc, char *argv[])
         clearArgs();
         processInput(input);
 
+        printf("Input: %s\n", line);
+
         //cat
         if (!strcmp(cmd, "lcat"))
         {
-            if (getpathname())
+            if (strlen(args[0]))
             {
                 int fd, i, n;
                 char buf[1024];
-                fd = open(pathname, O_RDONLY);
+                fd = open(args[0], O_RDONLY);
                 while (n = read(fd, buf, 1024))
                 {
                     for (i = 0; i < n; i++)
@@ -144,22 +149,21 @@ main(int argc, char *argv[])
                     dirptr = opendir(args[0]);
                 }
                 while ((ent = readdir(dirptr)) != NULL) {
-                    printf("<p>%s", ent->d_name);
+                    printf("%s\n", ent->d_name);
                 }
         }
         //cd
         else if (!strcmp(cmd, "lcd"))
         {
-            if(strlen(args[0])) {
-                chdir(args[0]);
-            }
+            chdir(args[0]);
+            
         }
         //mkdir
         else if (!strcmp(cmd, "lmkdir"))
         {
             if (strlen(args[0]))
             {
-                mkdir(args[0]);
+                mkdir(args[0], 0644);
             }
         }
         //rmdir
@@ -182,7 +186,7 @@ main(int argc, char *argv[])
         //pwd/ls/cd/mkdir/rmdir/rm
         else if (!strcmp(cmd, "pwd") || !strcmp(cmd, "ls") || !strcmp(cmd, "cd") || !strcmp(cmd, "mkdir") || !strcmp(cmd, "rmdir") || !strcmp(cmd, "rm"))
         {
-            n = write(server_sock, input, MAX);
+            n = write(server_sock, line, MAX);
             printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
 
             n = read(server_sock, ans, MAX);
@@ -191,32 +195,14 @@ main(int argc, char *argv[])
         //get
         else if (!strcmp(cmd, "get"))
         {
-            int filesize, n, count = 0, newFile;
-            char *buff[MAX];
-
-            n = read(server_sock, &filesize, sizeof(filesize));
-            printf("File Size from server: %d\n", filesize);
-            if (filesize == -1)
-            {
-                printf("Server could not stat given file path.\n");
-            }
-
-            newFile = open(args[0], O_WRONLY | O_CREAT, 0644);
-            while (count < filesize) {
-                n = read(server_sock, buff, MAX);
-                printf("Recieved %d bytes from server\n", n);
-                count += n;
-                write(newFile, buff, MAX);
-                bzero(buff, MAX);
-                buff[MAX-1] = '\0';
-            }
-            fclose(newFile);
+            
         }
         //put
         else if (!strcmp(cmd, "put"))
         {
-            write(cfd, str, MAX);
-            str = strtok(str, " ");
+            char *str;
+            write(cfd, args[0], MAX);
+            str = strtok(args[0], " ");
             str = strtok(NULL, "");
 
             int fd, size, ln, total, r;
@@ -242,10 +228,10 @@ main(int argc, char *argv[])
 
             total = 0;
 
-            while (ln=read(fd, buf, BLK)) {
-                write(cfd, buf, ln);
+            while (ln=read(fd, buff, BLK)) {
+                write(cfd, buff, ln);
                 total += ln;
-                bzero(buf, BLK);
+                bzero(buff, BLK);
             }
             printf("Sent %d bytes\n",  total);
         }
@@ -265,8 +251,12 @@ int processInput(char *line)
     char *token;
     int i = 0;
 
+    printf("DEBUG\n");
+
     token = strtok(line, " ");
     strcpy(cmd, token);
+
+    printf("DEBUG\n");
 
     while (token = strtok(NULL, " "))
     {

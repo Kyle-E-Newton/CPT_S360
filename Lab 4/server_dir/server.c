@@ -140,13 +140,18 @@ main(int argc, char *argv[])
             }
 
             //Commands
-            if (!strcmp(command, "ls")){
+            if (!strcmp(command, "pwd")) {
+                char cwd[128];
+                getcwd(cwd, MAX);
+                printf("%s\n", cwd);
+            }
+            else if (!strcmp(command, "ls")){
                 dirptr = opendir(".");
                 if(strlen(args[0])) {
                     dirptr = opendir(args[0]);
                 }
                 while ((ent = readdir(dirptr)) != NULL) {
-                    printf("<p>%s", ent->d_name);
+                    printf("%s\n", ent->d_name);
                 }
             }
             else if (!strcmp(command, "cd")) {
@@ -159,13 +164,7 @@ main(int argc, char *argv[])
                 rmdir(args[0]);
             }
             else if (!strcmp(command, "rm")) {
-                unink(args[0]);
-            }
-            else if (!strcmp(command, "get")) {
-
-            }
-            else if (!strcmp(command, "put")) {
-
+                unlink(args[0]);
             }
             else if (!strcmp(command, "quit")) {
                 printf("Quit Recieved from Client\n");
