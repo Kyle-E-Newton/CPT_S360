@@ -27,6 +27,11 @@ char args[10][256];
 DIR *dirptr;
 struct dirent *ent;
 
+char *t1 = "xwrxwrxwr-------";
+char *t2 = "----------------";
+
+char cwd[128];
+
 // Server initialization code:
 
 int server_init(char *name)
@@ -77,6 +82,10 @@ int server_init(char *name)
         printf("get socketname error\n");
         exit(4);
     }
+
+    getcwd(cwd ,128);
+    printf("5.5: Set Chroor to %s\n", cwd);
+    chroot(cwd);
 
     // show port number
     serverPort = ntohs(name_addr.sin_port); // convert to host ushort
@@ -153,14 +162,32 @@ main(int argc, char *argv[])
             }
             else if (!strcmp(command, "ls"))
             {
-                dirptr = opendir(".");
-                if (strlen(args[0]))
+                if (strcmp(args[0], "-l"))
                 {
-                    dirptr = opendir(args[0]);
+                    dirptr = opendir(".");
+                    if (strlen(args[1]))
+                    {
+                        dirptr = opendir(args[1]);
+                    }
+                    while ((ent = readdir(dirptr)) != NULL)
+                    {
+                        printf("%s\n", ent->d_name);
+                    }
                 }
-                while ((ent = readdir(dirptr)) != NULL)
+                else
                 {
-                    printf("%s\n", ent->d_name);
+                    dirptr = opendir(".");
+                    if (dirptr)
+                    {
+                        while (ent = readdir(dirptr))
+                        {
+                            if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
+                            {
+                                ls_file(ent->d_name);
+                                printf("\n");
+                            }
+                        }
+                    }
                 }
             }
             else if (!strcmp(command, "cd"))
@@ -299,4 +326,38 @@ int clearArgs(void)
         i++;
     }
     return 1;
+}
+int ls_file(char *fname) {
+    struct stat fstat, *sp;
+    int r, i;
+    char ftime[64] = "";
+    char linkname[12] = "";
+    sp = &fstat;
+    if((r = lstat(fname, &fstat)) < 0) {
+        exit(1);
+    }
+    if ((sp->st_mode & 0xF000) == 0x8000)   //REG
+        printf("%c", '-');
+    if ((sp->st_mode & 0xF000) == 0x4000)   //DIR
+        printf("%c", 'd');
+    if ((sp->st_mode & 0xF000) == 0xA000)   //LNK
+        printf("%c", 'l');
+    for(i = 8; i >= 0; i--) {
+        if(sp->st_mode & (1 << i))  //print r|w|x
+            printf("%c", t1[i]);
+        else
+            printf("%c", t2[i]);
+    }
+    printf("%4d ", sp->st_nlink);
+    printf("%4d ", sp->st_gid);
+    printf("%4d ", sp->st_uid);
+    printf("%8d ", sp->st_size);
+    strcpy(ftime, ctime(&sp->st_ctime));
+    ftime[strlen(ftime) - 1] = 0;
+    printf("%s  ", ftime);
+    printf("%s ", fname);
+    if((sp->st_mode & 0xF000) == 0xA000) {
+        readlink(fname, linkname, 128);
+        printf(" -> %s", linkname);
+    }
 }
