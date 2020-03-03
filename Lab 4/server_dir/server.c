@@ -4,11 +4,14 @@
 #include <string.h>
 
 #include <dirent.h>
+#include <fcntl.h>
 
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <netdb.h>
 
 #define MAX 256
+#define BLK 1024
 
 // Define variables:
 struct sockaddr_in server_addr, client_addr, name_addr;
@@ -134,51 +137,102 @@ main(int argc, char *argv[])
             processInput(line);
 
             strcat(line, command);
-            if (strlen(args[0]) > 0) {
+            if (strlen(args[0]) > 0)
+            {
                 strcat(line, " | Argument: ");
                 strcat(line, args[0]);
             }
 
             //Commands
-            if (!strcmp(command, "pwd")) {
+            if (!strcmp(command, "pwd"))
+            {
                 char cwd[128];
                 getcwd(cwd, MAX);
                 printf("%s\n", cwd);
             }
-            else if (!strcmp(command, "ls")){
+            else if (!strcmp(command, "ls"))
+            {
                 dirptr = opendir(".");
-                if(strlen(args[0])) {
+                if (strlen(args[0]))
+                {
                     dirptr = opendir(args[0]);
                 }
-                while ((ent = readdir(dirptr)) != NULL) {
+                while ((ent = readdir(dirptr)) != NULL)
+                {
                     printf("%s\n", ent->d_name);
                 }
             }
-            else if (!strcmp(command, "cd")) {
+            else if (!strcmp(command, "cd"))
+            {
                 chdir(args[0]);
             }
-            else if(!strcmp(command, "mkdir")) {
+            else if (!strcmp(command, "mkdir"))
+            {
                 mkdir(args[0], 0755);
             }
-            else if (!strcmp(command, "rmdir")) {
+            else if (!strcmp(command, "rmdir"))
+            {
                 rmdir(args[0]);
             }
-            else if (!strcmp(command, "rm")) {
+            else if (!strcmp(command, "rm"))
+            {
                 unlink(args[0]);
             }
-            else if (!strcmp(command, "quit")) {
+            else if (!strcmp(command, "quit"))
+            {
                 printf("Quit Recieved from Client\n");
                 exit(1);
-            }   
-            
+            }
+            else if (!strcmp(command, "get"))
+            {
+                int fd, size, ln, total, r;
+                struct stat mystat, *sp;
+                char buff[BLK], ans[BLK];
 
-            strcat(line, " ECHO");
+                sp = &mystat;
+                r = stat(args[0], sp);
+                if (r < 0)
+                {
+                    printf("Client: Can't See stat\n");
+                }
+                if (!S_ISREG(sp->st_mode))
+                {
+                    printf("%s is not a REG file\n", args[0]);
+                }
+                printf("Args[0] = %s\n", args[0]);
+                fd = open(args[0], O_RDONLY);
+                if (fd < 0)
+                {
+                    printf("Cannot open %s for READ\n", args[0]);
+                }
 
-            // send the echo line to client
-            n = write(client_sock, line, MAX);
+                sprintf(ans, "OK %d", sp->st_size);
+                write(client_sock, ans, BLK);
 
-            printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, line);
-            printf("server: ready for next request\n");
+                total = 0;
+
+                while (ln = read(fd, buff, BLK))
+                {
+                    write(client_sock, buff, ln);
+                    //printf("%s\n", buff);
+                    total += ln;
+                    printf("n=%d total=%d\n", ln, total);
+                    bzero(buff, BLK);
+                }
+            }
+            else if (!strcmp(command, "put")) {
+
+            }
+
+            if (strcmp(command, "get"))
+            {
+                strcat(line, " ECHO");
+                // send the echo line to client
+                n = write(client_sock, line, MAX);
+
+                printf("server: wrote n=%d bytes; ECHO=[%s]\n", n, line);
+                printf("server: ready for next request\n");
+            }
         }
     }
 }
@@ -201,9 +255,11 @@ int processInput(char *line)
     }
     return 1;
 }
-int clearArgs(void) {
+int clearArgs(void)
+{
     int i = 0;
-    while (i < 10) {
+    while (i < 10)
+    {
         bzero(args[i], 256);
         i++;
     }

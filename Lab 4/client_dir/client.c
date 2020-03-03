@@ -195,7 +195,36 @@ main(int argc, char *argv[])
         //get
         else if (!strcmp(cmd, "get"))
         {
-            
+            printf("GET\n");
+            n = write(server_sock, line, MAX);
+            printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
+
+            char *str;
+            str = strtok(line, " ");
+            str = strtok(NULL, "");
+            printf("Entering get: str = %s\n", args[0]);
+
+            int fd, size, ln, total, r;
+            char buff[BLK];
+            char ok[MAX];
+
+            ln = read(server_sock, buff, BLK);
+            sscanf(buff, "%s %d", ok, &size);
+            printf("buf = %s\n", buff);
+            printf("ok = %s\n", ok);
+            printf("Size = %d\n", size);
+            if(!strcmp(ok, "OK")) {
+                fd = open(str, O_WRONLY|O_CREAT, 0755);
+                total = 0;
+                while (total < size) {
+                    printf("GET\n");
+                    ln = read(server_sock, buff, BLK);
+                    write(fd, buff, ln);
+                    total += ln;
+                    printf("n=%d total=%d\n", ln, total);
+                }
+                close(fd);
+            }
         }
         //put
         else if (!strcmp(cmd, "put"))
@@ -251,12 +280,8 @@ int processInput(char *line)
     char *token;
     int i = 0;
 
-    printf("DEBUG\n");
-
     token = strtok(line, " ");
     strcpy(cmd, token);
-
-    printf("DEBUG\n");
 
     while (token = strtok(NULL, " "))
     {
