@@ -103,7 +103,7 @@ main(int argc, char *argv[])
         getcwd(cwd, MAX);           //Get client working directory
         if (line[0] == 0)           // exit if NULL line
             exit(0);
-        
+
         char input[MAX];
         strcpy(input, line);
         clearArgs();
@@ -145,18 +145,19 @@ main(int argc, char *argv[])
         else if (!strcmp(cmd, "lls"))
         {
             dirptr = opendir(".");
-                if(strlen(args[0])) {
-                    dirptr = opendir(args[0]);
-                }
-                while ((ent = readdir(dirptr)) != NULL) {
-                    printf("%s\n", ent->d_name);
-                }
+            if (strlen(args[0]))
+            {
+                dirptr = opendir(args[0]);
+            }
+            while ((ent = readdir(dirptr)) != NULL)
+            {
+                printf("%s\n", ent->d_name);
+            }
         }
         //cd
         else if (!strcmp(cmd, "lcd"))
         {
             chdir(args[0]);
-            
         }
         //mkdir
         else if (!strcmp(cmd, "lmkdir"))
@@ -213,10 +214,12 @@ main(int argc, char *argv[])
             printf("buf = %s\n", buff);
             printf("ok = %s\n", ok);
             printf("Size = %d\n", size);
-            if(!strcmp(ok, "OK")) {
-                fd = open(str, O_WRONLY|O_CREAT, 0755);
+            if (!strcmp(ok, "OK"))
+            {
+                fd = open(str, O_WRONLY | O_CREAT, 0755);
                 total = 0;
-                while (total < size) {
+                while (total < size)
+                {
                     printf("GET\n");
                     ln = read(server_sock, buff, BLK);
                     write(fd, buff, ln);
@@ -229,48 +232,42 @@ main(int argc, char *argv[])
         //put
         else if (!strcmp(cmd, "put"))
         {
-            char *str;
-            write(cfd, args[0], MAX);
-            str = strtok(args[0], " ");
-            str = strtok(NULL, "");
-
+            n = write(server_sock, line, MAX);
             int fd, size, ln, total, r;
             struct stat mystat, *sp;
-            char buff[BLK], and[BLK];
+            char buff[BLK], ans[BLK];
 
             sp = &mystat;
-            r = stat(str, sp);
-            if (r < 0) {
-                printf("Client: Can't Stat %s\n", str);
+            r = stat(args[0], sp);
+            if (r < 0)
+            {
+                printf("Client: Can't See stat\n");
             }
-            if(!S_ISREG(sp->st_mode)) {
-                printf("%s is not REG file\n", str);
+            if (!S_ISREG(sp->st_mode))
+            {
+                printf("%s is not a REG file\n", args[0]);
             }
-
-            fd = open(str, O_RDONLY);
-            if (fd < 0) {
-                printf("Cannot open %s for Read\n", str);
+            printf("Args[0] = %s\n", args[0]);
+            fd = open(args[0], O_RDONLY);
+            if (fd < 0)
+            {
+                printf("Cannot open %s for READ\n", args[0]);
             }
 
             sprintf(ans, "OK %d", sp->st_size);
-            write(cfd, ans, BLK);
+            printf("Ans: %s\n", ans);
+            write(server_sock, ans, BLK);
 
             total = 0;
 
-            while (ln=read(fd, buff, BLK)) {
-                write(cfd, buff, ln);
+            while (ln = read(fd, buff, BLK))
+            {
+                write(server_sock, buff, ln);
+                //printf("%s\n", buff);
                 total += ln;
+                printf("n=%d total=%d\n", ln, total);
                 bzero(buff, BLK);
             }
-            printf("Sent %d bytes\n",  total);
-        }
-        //quit
-        else if (!strcmp(cmd, "quit")) {
-            printf("Exiting\n");
-            exit(1);
-        }
-        else {
-            printf("Unknown Command\n");
         }
     }
 }

@@ -123,6 +123,7 @@ main(int argc, char *argv[])
         while (1)
         {
             n = read(client_sock, line, MAX);
+            printf("Line: %s\n", line);
             if (n == 0)
             {
                 printf("server: client died, server loops\n");
@@ -207,6 +208,7 @@ main(int argc, char *argv[])
                 }
 
                 sprintf(ans, "OK %d", sp->st_size);
+                printf("Ans: %s\n", ans);
                 write(client_sock, ans, BLK);
 
                 total = 0;
@@ -219,12 +221,45 @@ main(int argc, char *argv[])
                     printf("n=%d total=%d\n", ln, total);
                     bzero(buff, BLK);
                 }
+                printf("server: ready for next request\n");
             }
-            else if (!strcmp(command, "put")) {
+            else if (!strcmp(command, "put"))
+            {
+                printf("GET\n");
+                n = write(client_sock, line, MAX);
+                printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
 
+                char *str;
+                str = strtok(line, " ");
+                str = strtok(NULL, "");
+                printf("Entering get: str = %s\n", args[0]);
+
+                int fd, size, ln, total, r;
+                char buff[BLK];
+                char ok[MAX];
+
+                ln = read(client_sock, buff, BLK);
+                sscanf(buff, "%s %d", ok, &size);
+                printf("buf = %s\n", buff);
+                printf("ok = %s\n", ok);
+                printf("Size = %d\n", size);
+                if (!strcmp(ok, "OK"))
+                {
+                    fd = open(args[0], O_WRONLY | O_CREAT, 0755);
+                    total = 0;
+                    while (total < size)
+                    {
+                        printf("GET\n");
+                        ln = read(client_sock, buff, BLK);
+                        write(fd, buff, ln);
+                        total += ln;
+                        printf("n=%d total=%d\n", ln, total);
+                    }
+                    printf("server: ready for next request\n");
+                }
             }
 
-            if (strcmp(command, "get"))
+            if (strcmp(command, "get") && strcmp(command, "put"))
             {
                 strcat(line, " ECHO");
                 // send the echo line to client
