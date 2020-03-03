@@ -14,10 +14,6 @@
 struct sockaddr_in server_addr, client_addr, name_addr;
 struct hostent *hp;
 
-char *t1 = "xwrxwrxwr-------";
-char *t2 = "----------------";
-char ftime[64];
-
 int mysock, client_sock; // socket descriptors
 int serverPort;          // server port number
 int r, length, n;        // help variables

@@ -10,6 +10,7 @@
 #include <dirent.h>
 
 #define MAX 256
+#define BLK 1024
 
 // Define variables
 struct hostent *hp;
@@ -20,6 +21,9 @@ int SERVER_IP, SERVER_PORT;
 
 char *cmd, cwd[128], *pathname, line[MAX], ans[MAX];
 char args[10][MAX];
+
+DIR *dirptr;
+struct dirent *ent;
 
 // clinet initialization code
 
@@ -69,25 +73,10 @@ int client_init(char *argv[])
     printf("========= init done ==========\n");
 }
 
-int getpathname()
-{
-    pathname = strtok(0, " ");
-    if (pathname[0] == 0)
-    {
-        printf("No Pathname Specified");
-        return 0;
-    }
-    return 1;
-}
-
-void ls()
-{
-}
-
 main(int argc, char *argv[])
 {
     int n;
-
+    cfd = socket(AF_INET, SOCK_STREAM, 0);
     if (argc < 3)
     {
         printf("Usage : client ServerName SeverPort\n");
@@ -111,153 +100,162 @@ main(int argc, char *argv[])
         getcwd(cwd, MAX);           //Get client working directory
         if (line[0] == 0)           // exit if NULL line
             exit(0);
-        else {
-            char input[MAX];
-            strcpy(input, line);
+        
+        char input[MAX];
+        strcpy(input, line);
+        clearArgs();
+        processInput(input);
 
-            cmd = strtok(line, " ");
-            if(!strcmp(cmd, "exit")) {
-                exit(1);
-            }
-            //pwd
-            else if (!strcmp(cmd, "lpwd")) {
-                printf("%s\n", cwd);
-            }
-            //cat
-            else if (!strcmp(cmd, "lcat")) {
-                if(getpathname()) {
-                    int fd, i, n;
-                    char buf[1024];
-                    fd = open(pathname, O_RDONLY);
-                    while (n = read(fd, buf, 1024)) {
-                        for(i = 0; i < n; i++) {
-                            if(buf[i] == '\n') {
-                                putchar('\n');
-                                putchar('\r');
-                            }
-                            else
-                            {
-                                putchar(buf[i]);
-                            }
-                            
+        //cat
+        if (!strcmp(cmd, "lcat"))
+        {
+            if (getpathname())
+            {
+                int fd, i, n;
+                char buf[1024];
+                fd = open(pathname, O_RDONLY);
+                while (n = read(fd, buf, 1024))
+                {
+                    for (i = 0; i < n; i++)
+                    {
+                        if (buf[i] == '\n')
+                        {
+                            putchar('\n');
+                            putchar('\r');
+                        }
+                        else
+                        {
+                            putchar(buf[i]);
                         }
                     }
                 }
             }
-            //ls
-            else if (!strcmp(cmd, "lls")) {
-                pathname = strtok(0, " ");
-                if (strcmp(pathname, "") == 0) {
-                    strcpy(pathname, cwd);
+        }
+        //pwd
+        else if (!strcmp(cmd, "lpwd"))
+        {
+            printf("%s\n", cwd);
+        }
+        //ls
+        else if (!strcmp(cmd, "lls"))
+        {
+            dirptr = opendir(".");
+                if(strlen(args[0])) {
+                    dirptr = opendir(args[0]);
                 }
-                ls();
-            }
-            //cd
-            else if (!strcmp(cmd, "lcd")) {
-                if (getpathname()) {
-                    chdir(pathname);
+                while ((ent = readdir(dirptr)) != NULL) {
+                    printf("<p>%s", ent->d_name);
                 }
+        }
+        //cd
+        else if (!strcmp(cmd, "lcd"))
+        {
+            if(strlen(args[0])) {
+                chdir(args[0]);
             }
-            //mkdir
-            else if (!strcmp(cmd, "lmkdir")) {
-                if (getpathname()) {
-                    rmdir(pathname);
-                }
+        }
+        //mkdir
+        else if (!strcmp(cmd, "lmkdir"))
+        {
+            if (strlen(args[0]))
+            {
+                mkdir(args[0]);
             }
-            //rmdir
-            else if (!strcmp(cmd, "lrmdir")) {
-                if (getpathname()) {
-                    rmdir(pathname);
-                }
+        }
+        //rmdir
+        else if (!strcmp(cmd, "lrmdir"))
+        {
+            if (strlen(args[0]))
+            {
+                rmdir(args[0]);
             }
-            //rm
-            else if (!strcmp(cmd, "lrm")) {
-                if (getpathname()) {
-                    unlink(pathname);
-                }
+        }
+        //rm
+        else if (!strcmp(cmd, "lrm"))
+        {
+            if (strlen(args[0]))
+            {
+                unlink(args[0]);
             }
-            //Server Commands
-            //pwd
-            else if (!strcmp(cmd, "pwd")) {
-                n = write(server_sock, input, MAX);
-                printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
+        }
+        //Server Commands
+        //pwd/ls/cd/mkdir/rmdir/rm
+        else if (!strcmp(cmd, "pwd") || !strcmp(cmd, "ls") || !strcmp(cmd, "cd") || !strcmp(cmd, "mkdir") || !strcmp(cmd, "rmdir") || !strcmp(cmd, "rm"))
+        {
+            n = write(server_sock, input, MAX);
+            printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
 
-                n = read(server_sock, ans, MAX);
-                printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
-            }
-            //ls
-            else if (!strcmp(cmd, "ls")) {
-                n = write(server_sock, input, MAX);
-                printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
+            n = read(server_sock, ans, MAX);
+            printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
+        }
+        //get
+        else if (!strcmp(cmd, "get"))
+        {
+            int filesize, n, count = 0, newFile;
+            char *buff[MAX];
 
-                n = read(server_sock, ans, MAX);
-                printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
-            }
-            //cd
-            else if (!strcmp(cmd, "cd")) {
-                if (getpathname()) {
-                    n = write(server_sock, input, MAX);
-                    printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
-
-                    n = read(server_sock, ans, MAX);
-                    printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
-                }
-            }
-            //mkdir
-            else if (!strcmp(cmd, "mkdir")) {
-                if (getpathname()) {
-                    n = write(server_sock, input, MAX);
-                    printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
-
-                    n = read(server_sock, ans, MAX);
-                    printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
-                }
-            }
-            //rmdir
-            else if (!strcmp(cmd, "rmdir")) {
-                if (getpathname()) {
-                    n = write(server_sock, input, MAX);
-                    printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
-
-                    n = read(server_sock, ans, MAX);
-                    printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
-                }
-            }
-            //rm
-            else if (!strcmp(cmd, "rm")) {
-                if (getpathname()) {
-                    n = write(server_sock, input, MAX);
-                    printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
-
-                    n = read(server_sock, ans, MAX);
-                    printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
-                }
-            }
-            //get
-            else if (!strcmp(cmd, "get")) {
-                int filesize, n, count = 0, newFile;
-                char *buff[MAX];
-
-                n = read(server_sock, &filesize, sizeof(filesize));
-                printf("File Size from server: %d\n", filesize);
-                if (filesize == -1) {
-                    printf("Server could not stat given file path.\n");
-                }
-
-                newFile = open(args[0])
-            }
-            //put
-            else if (!strcmp(cmd, "put")) {
-                if (getpathname()) {
-                    n = write(server_sock, input, MAX);
-                    printf("client: wrote n=%d bytes; line=(%s)\n", n, line);
-
-                    n = read(server_sock, ans, MAX);
-                    printf("client: read  n=%d bytes; echo=(%s)\n", n, ans);
-                }
+            n = read(server_sock, &filesize, sizeof(filesize));
+            printf("File Size from server: %d\n", filesize);
+            if (filesize == -1)
+            {
+                printf("Server could not stat given file path.\n");
             }
 
+            newFile = open(args[0], O_WRONLY | O_CREAT, 0644);
+            while (count < filesize) {
+                n = read(server_sock, buff, MAX);
+                printf("Recieved %d bytes from server\n", n);
+                count += n;
+                write(newFile, buff, MAX);
+                bzero(buff, MAX);
+                buff[MAX-1] = '\0';
+            }
+            fclose(newFile);
+        }
+        //put
+        else if (!strcmp(cmd, "put"))
+        {
+            write(cfd, str, MAX);
+            str = strtok(str, " ");
+            str = strtok(NULL, "");
 
+            int fd, size, ln, total, r;
+            struct stat mystat, *sp;
+            char buff[BLK], and[BLK];
+
+            sp = &mystat;
+            r = stat(str, sp);
+            if (r < 0) {
+                printf("Client: Can't Stat %s\n", str);
+            }
+            if(!S_ISREG(sp->st_mode)) {
+                printf("%s is not REG file\n", str);
+            }
+
+            fd = open(str, O_RDONLY);
+            if (fd < 0) {
+                printf("Cannot open %s for Read\n", str);
+            }
+
+            sprintf(ans, "OK %d", sp->st_size);
+            write(cfd, ans, BLK);
+
+            total = 0;
+
+            while (ln=read(fd, buf, BLK)) {
+                write(cfd, buf, ln);
+                total += ln;
+                bzero(buf, BLK);
+            }
+            printf("Sent %d bytes\n",  total);
+        }
+        //quit
+        else if (!strcmp(cmd, "quit")) {
+            printf("Exiting\n");
+            exit(1);
+        }
+        else {
+            printf("Unknown Command\n");
         }
     }
 }
@@ -280,9 +278,11 @@ int processInput(char *line)
     }
     return 1;
 }
-int clearArgs(void) {
+int clearArgs(void)
+{
     int i = 0;
-    while (i < 10) {
+    while (i < 10)
+    {
         bzero(args[i], 256);
         i++;
     }
