@@ -1,0 +1,17 @@
+THESE ARE THE REVIEW QUESTIONS
+
+1. Mount root is called during system initialization to mount the root file system. It checks if it is a valid EXT2 file system, then loads the root inode into a minode.
+
+2. Given  int ino;              // an INODE number
+          INODE thisInode;      // an INODE structure
+   Write C code to load the INODE of ino into thisInode
+
+thisInode = iget(dev, ino);
+
+3. 
+(1). 
+getino(mip->dev, mip->ino);
+
+(2). 
+struct stat mystat = stat(mip);
+mystat->
