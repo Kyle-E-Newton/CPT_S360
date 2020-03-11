@@ -1,3 +1,8 @@
+/*********************************************
+1. Does LS Work? - Yes
+2. Does CD Work? - Yes
+3. Does PWD Work? - Yes
+
 /************* cd_ls_pwd.c file **************/
 
 int chdir(char *pathname)
@@ -54,6 +59,8 @@ int do_ls(char *path) {
   int device = running->cwd->dev;
   char *child;
 
+  //printf("PATH: %s\n", path);
+
   if (path[0] == 0) {
     mip = iget(device, running->cwd->ino);
     printChild(device, mip);
@@ -63,7 +70,8 @@ int do_ls(char *path) {
       device = root->dev;
     }
 
-    ino = getino(&device);
+    ino = getino(path);
+    printf("Path: %s\n", path);
     if(!ino) {
       return 1;
     }
@@ -196,7 +204,6 @@ void printChild(int devicename, MINODE *mip) {
   char buf[BLKSIZE], namebuf[256], *cp;
   DIR *dirptr;
   int i, ino;
-  MINODE *mip;
 
   for(i = 0; i <= 11; i++) {
     if(mip->INODE.i_block[i]) {
