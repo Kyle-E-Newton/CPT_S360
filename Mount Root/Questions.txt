@@ -10,8 +10,27 @@ thisInode = iget(dev, ino);
 
 3. 
 (1). 
-getino(mip->dev, mip->ino);
+printf("%s\n", findino(mip, &my_ino, &parent_ino));
 
 (2). 
-struct stat mystat = stat(mip);
-mystat->
+   MINODE* parent = iget(running->cwd->device, parent_ino);
+	for(i = 0; i < 11; i++) {
+      if(parent->INODE.i_block[i] != 0) {
+         get_block(parent->dev, parent->INODE.i_block[i], buf);
+         dp = (DIR *)buf;
+         cp = buf;
+
+         while (cp < &buf[BLKSIZE]) {
+            strncpy(namebuf, dp->name, dp->name_len);
+            namebuf[dp->name_len] = 0;
+
+            if(dp->inode == myino) {
+               strcpy(myname, namebuf);
+               return 1;
+            }
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
+         }
+      }
+   }
+

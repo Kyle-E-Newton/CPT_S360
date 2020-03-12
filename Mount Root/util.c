@@ -169,7 +169,7 @@ int getino(char *pathname)
    return ino;
 }
 
-int findmyname(MINODE *parent, unsigned long myino, char *myname) 
+int findmyname(MINODE *parent, u32 myino, char *myname) 
 {
   // WRITE YOUR code here:
   // search parent's data block for myino;

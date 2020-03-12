@@ -250,7 +250,7 @@ char *pwd(MINODE *wd)
 void do_pwd(MINODE *wd) {
   struct DIR *dirptr;
   char myname[256];
-  unsigned long myino, parentino;
+  u32 myino, parentino;
   int f;
 
   if (wd == root) {
